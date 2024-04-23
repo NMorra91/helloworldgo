@@ -34,9 +34,9 @@ jobs:
     - name: Build Go
       run: |
         cd lambda
-        rm -rf bootstrap function.zip
+        rm -rf bootstrap hello.zip
         go build -o bootstrap main.go
-        zip function.zip bootstrap
+        zip hello.zip bootstrap
       env:
         GOOS: linux
         GOARCH: amd64
@@ -54,7 +54,6 @@ jobs:
   
   cdk-deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.operation == 'cdk_deploy'
     steps:
     - name: Checkout code
       uses: actions/checkout@v2

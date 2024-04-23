@@ -10,7 +10,7 @@ export class LambdaCdkStack extends cdk.Stack {
     // Lambda Function
     const helloLambda = new lambda.Function(this, 'HelloHandler', {
       runtime: lambda.Runtime.PROVIDED_AL2,
-      code: lambda.Code.fromAsset('./lambda/function.zip'),
+      code: lambda.Code.fromAsset('./lambda/hello.zip'),
       handler: 'bootstrap',
     });
 
