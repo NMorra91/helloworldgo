@@ -83,7 +83,7 @@ jobs:
 
     - name: CDK Deploy
       run: |
-        cdk bootstrap
+        npx cdk bootstrap
         npm install aws-cdk aws-cdk-lib ts-node
         npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
         cat cdk-outputs.json
