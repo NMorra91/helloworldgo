@@ -1,0 +1,92 @@
+name: Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Select Operation'
+        required: true
+        type: choice
+        options:
+          - cdk_deploy
+
+jobs:
+  cdk-diff:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.2'
+
+    - name: Build Go
+      run: |
+        cd lambda
+        rm -rf bootstrap function.zip
+        go build -o bootstrap main.go
+        zip function.zip bootstrap
+      env:
+        GOOS: linux
+        GOARCH: amd64
+        CGO_ENABLED: 0
+
+    - name: CDK Diff
+      run: |
+        npm install aws-cdk aws-cdk-lib ts-node
+        npx cdk diff
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+  
+  cdk-deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.operation == 'cdk_deploy'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.2'
+
+    - name: Build Go
+      run: |
+        cd lambda
+        rm -rf bootstrap hello.zip
+        go build -o bootstrap main.go
+        zip hello.zip bootstrap
+      env:
+        GOOS: linux
+        GOARCH: amd64
+        CGO_ENABLED: 0
+
+    - name: CDK Deploy
+      run: |
+        npm install aws-cdk aws-cdk-lib ts-node
+        npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+        cat cdk-outputs.json
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
