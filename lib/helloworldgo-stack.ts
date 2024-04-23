@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib/core';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 export class LambdaCdkStack extends cdk.Stack {
@@ -8,9 +8,10 @@ export class LambdaCdkStack extends cdk.Stack {
     super(scope, id, props);
 
     // Lambda Function
-    const helloLambda = new lambdaNodeJs.NodejsFunction(this, 'HelloLambda', {
-      entry: '..lambda/main.go', // Path to your GoLang code
-      handler: 'main',
+    const helloLambda = new lambda.Function(this, 'HelloHandler', {
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset('./lambda/function.zip'),
+      handler: 'bootstrap',
     });
 
     // API Gateway
