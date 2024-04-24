@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+)
+
+func HandleRequest() (events.APIGatewayProxyResponse, error) {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body:       "Hello from Lambda!",
+	}, nil
+}
 
 func main() {
-	fmt.Println("Hello, World!")
+	lambda.Start(HandleRequest)
 }
